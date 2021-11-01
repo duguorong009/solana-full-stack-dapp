@@ -9,10 +9,11 @@ describe('mysolanaapp', () => {
   const program = anchor.workspace.Mysolanaapp;
   let _baseAccount;
 
-  it("Creates a counter", async () => {
+  it("Initialize data store", async () => {
     /* Call the create function via RPC */
     const baseAccount = anchor.web3.Keypair.generate();
-    await program.rpc.create({
+    const testData = "Initialisation test";
+    await program.rpc.initialize(testData, {
       accounts: {
         baseAccount: baseAccount.publicKey,
         user: provider.wallet.publicKey,
@@ -20,24 +21,25 @@ describe('mysolanaapp', () => {
       },
       signers: [baseAccount],
     });
-
-    /* Fetch the account and check the value of count */
+    /* Fetch the data and check if matches the input */
     const account = await program.account.baseAccount.fetch(baseAccount.publicKey);
-    console.log('Count 0: ', account.count.toString());
-    assert.ok(account.count.toString() == 0);
+    console.log('Data: ', account.data);
+    console.log(`Data-List: ${account.dataList}`);
+    assert.ok(account.data.toString() == testData);
     _baseAccount = baseAccount;
   });
 
-  it("Increments the counter", async () => {
+  it("Update the data store", async () => {
     const baseAccount = _baseAccount;
-    await program.rpc.increment({
+    await program.rpc.update("2nd Input", {
       accounts: {
         baseAccount: baseAccount.publicKey,
       },
     });
 
     const account = await program.account.baseAccount.fetch(baseAccount.publicKey);
-    console.log('Count 1: ', account.count.toString());
-    assert.ok(account.count.toString() == 1);
+    console.log('Data ', account.data);
+    console.log('DataList ', account.dataList);
+    assert.ok(account.data == "2nd Input");
   })
 });
